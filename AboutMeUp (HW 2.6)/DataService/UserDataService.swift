@@ -6,15 +6,32 @@
 //
 
 import Foundation
+import UIKit
 
 enum UserDataServiceError: Error {
     case userNotFound(title: String, message: String)
 }
 
 fileprivate let users: [User] = [
-    User(id: UUID().uuidString, login: "admin", password: "admin"),
-    User(id: UUID().uuidString, login: "user", password: "password"),
-    User(id: UUID().uuidString, login: "samir", password: "cool_developer")
+    User(
+        id: UUID().uuidString,
+        login: "samir",
+        password: "samir",
+        info: User.Info(
+            name: "Самир",
+            surname: "Джафари",
+            age: 22,
+            post: "Разработчик",
+            image: .samir
+        ),
+        hobbies: ["Путешествовать",
+                  "Гладить котеек и собачек",
+                  "Ездить в поездах",
+                  "Смотреть киношки",
+                  "Готовить",
+                  "Писать код",
+                  "Слушать музыку"]
+    )
 ]
 
 final class UserDataService {
@@ -34,6 +51,5 @@ final class UserDataService {
         
         return user
     }
-    
     
 }

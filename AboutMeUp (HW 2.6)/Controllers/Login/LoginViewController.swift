@@ -22,8 +22,8 @@ final class LoginViewController: UIViewController {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.view.endEditing(true)
         super.touchesBegan(touches, with: event)
+        view.endEditing(true)
     }
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
@@ -36,43 +36,55 @@ final class LoginViewController: UIViewController {
             return true
         } catch UserDataServiceError.userNotFound(let title, let message) {
             showAlert(title: title, text: message)
+            passwordTF.text = ""
+            
             return false
         } catch {
             showAlert(
                 title: "Неизвестная ошибка",
                 text: "Произошла неизвестная ошибка. Попробуйте снова."
             )
+            passwordTF.text = ""
+            
             return false
         }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let accountVC = segue.destination as? WelcomeViewController else {
+        guard let tabBarController = segue.destination as? UITabBarController else {
             return
         }
         
-        accountVC.modalPresentationStyle = .fullScreen
-        accountVC.modalTransitionStyle = .flipHorizontal
+        guard let viewControllers = tabBarController.viewControllers else {
+            return
+        }
         
-        accountVC.user = user
+        for viewController in viewControllers {
+            switch viewController {
+            case let welcomeVC as WelcomeViewController:
+                welcomeVC.user = user
+            case let navigationVC as UINavigationController:
+                guard let userInfoVC = navigationVC.topViewController as? UserInfoViewController else {
+                    return
+                }
+                userInfoVC.user = user
+            default: break
+            }
+        }
+        
     }
     
     @IBAction func forgorButtonTapped(_ sender: UIButton) {
-        switch sender.tag {
-        case ButtonTags.forgotLogin.rawValue:
-            showAlert(title: "Логин", text: "Логин для входа: \"admin\"")
-        case ButtonTags.forgotPassword.rawValue:
-            showAlert(title: "Пароль", text: "Пароль для входа: \"admin\"")
-        default: break
-        }
+        sender.tag == ButtonTags.forgotLogin.rawValue
+        ? showAlert(title: "Логин", text: "Логин для входа: \"samir\"")
+        : showAlert(title: "Пароль", text: "Пароль для входа: \"samir\"")
     }
     
     @IBAction func unwind(for unwind: UIStoryboardSegue) {
-        guard let _ = unwind.source as? WelcomeViewController else {
-            return
-        }
+        loginTF.text = ""
+        passwordTF.text = ""
         
-        clearData()
+        user = nil
     }
 }
 
@@ -92,17 +104,6 @@ extension LoginViewController: UITextFieldDelegate {
         }
         
         return true
-    }
-}
-
-// MARK: - UI edit methods
-
-extension LoginViewController {
-    private func clearData() {
-        loginTF.text = ""
-        passwordTF.text = ""
-        
-        user = nil
     }
 }
 
